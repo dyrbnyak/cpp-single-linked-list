@@ -60,25 +60,26 @@ public:
         }
 
         BasicIterator& operator++() noexcept {
-			assert(node_ != nullptr);
-
+			assert(node_ != nullptr); 
+			// Не совсем понял, о каком съезде строки речь, у меня всё хорошо :)
             node_ = node_ -> next_node;
             return *this;
         }
 
         BasicIterator operator++(int) noexcept {
 			assert(node_ != nullptr);
-
             auto old_it(*this);
             ++(*this);
             return old_it;
         }
 
         [[nodiscard]] reference operator*() const noexcept {
+			assert(node_ != nullptr);
             return node_ -> value;
         }
 
         [[nodiscard]] pointer operator->() const noexcept {
+			assert(node_ != nullptr);
             return &node_ -> value;
         }
 
@@ -156,7 +157,8 @@ public:
     }
 
     Iterator InsertAfter(ConstIterator pos, const Type& value) {
-		assert(pos.node_ != nullptr);
+		assert(pos.node_ != nullptr); 
+		// Тут у меня тоже всё в порядке, строка хорошая, может там, где у вас отображается съезжает. На гите тоже ок
 
         Node* new_node = new Node(value, pos.node_ -> next_node);
         pos.node_ -> next_node = new_node;
@@ -167,11 +169,12 @@ public:
     }
 
     void PopFront() noexcept {
-        if(head_.next_node != nullptr){
-            auto* del_node = head_.next_node;
-            head_.next_node = head_.next_node -> next_node;
-            delete del_node;
-        }
+		assert(head_.next_node != nullptr);
+
+		auto* del_node = head_.next_node;
+		head_.next_node = head_.next_node -> next_node;
+		delete del_node;
+
         size_--;
     }
 
@@ -260,7 +263,13 @@ void swap(SingleLinkedList<Type>& lhs, SingleLinkedList<Type>& rhs) noexcept {
 
 template <typename Type>
 bool operator==(const SingleLinkedList<Type>& lhs, const SingleLinkedList<Type>& rhs) {
-	return std::equal(lhs.begin(), lhs.end(), rhs.begin(), rhs.end());
+	if(&lhs == &rhs){
+		return true;
+	} else if(lhs.GetSize() == rhs.GetSize()){
+		return true;
+	} else{
+		return std::equal(lhs.begin(), lhs.end(), rhs.begin(), rhs.end());
+	}
 }
 
 template <typename Type>
