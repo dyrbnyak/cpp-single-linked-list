@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cassert>
 #include <cstddef>
 #include <string>
 #include <utility>
@@ -47,7 +48,7 @@ public:
         }
 
         [[nodiscard]] bool operator!=(const BasicIterator<const Type>& rhs) const noexcept {
-            return this -> node_ != rhs.node_;
+            return !(this -> node_ == rhs.node_);
         }
 
         [[nodiscard]] bool operator==(const BasicIterator<Type>& rhs) const noexcept {
@@ -59,11 +60,15 @@ public:
         }
 
         BasicIterator& operator++() noexcept {
+			assert(node_ != nullptr);
+
             node_ = node_ -> next_node;
             return *this;
         }
 
         BasicIterator operator++(int) noexcept {
+			assert(node_ != nullptr);
+
             auto old_it(*this);
             ++(*this);
             return old_it;
@@ -151,6 +156,8 @@ public:
     }
 
     Iterator InsertAfter(ConstIterator pos, const Type& value) {
+		assert(pos.node_ != nullptr);
+
         Node* new_node = new Node(value, pos.node_ -> next_node);
         pos.node_ -> next_node = new_node;
 
@@ -160,7 +167,7 @@ public:
     }
 
     void PopFront() noexcept {
-        if(head_.next_node){
+        if(head_.next_node != nullptr){
             auto* del_node = head_.next_node;
             head_.next_node = head_.next_node -> next_node;
             delete del_node;
@@ -170,6 +177,9 @@ public:
 
 
     Iterator EraseAfter(ConstIterator pos) noexcept {
+		assert(pos.node_ != nullptr);
+		assert(IsEmpty() == false);
+
         auto* del_node = pos.node_ -> next_node;
         pos.node_ -> next_node = pos.node_ -> next_node -> next_node;
         delete del_node;
@@ -250,20 +260,7 @@ void swap(SingleLinkedList<Type>& lhs, SingleLinkedList<Type>& rhs) noexcept {
 
 template <typename Type>
 bool operator==(const SingleLinkedList<Type>& lhs, const SingleLinkedList<Type>& rhs) {
-    if (lhs.GetSize() != rhs.GetSize()) {
-        return false;
-    }
-
-    auto lhs_it = lhs.begin();
-    auto rhs_it = rhs.begin();
-    for (size_t i = 0; i < lhs.GetSize(); ++i) {
-        if (*lhs_it != *rhs_it) {
-            return false;
-        }
-        ++lhs_it;
-        ++rhs_it;
-    }
-    return true;
+	return std::equal(lhs.begin(), lhs.end(), rhs.begin(), rhs.end());
 }
 
 template <typename Type>
@@ -278,7 +275,7 @@ bool operator<(const SingleLinkedList<Type>& lhs, const SingleLinkedList<Type>& 
 
 template <typename Type>
 bool operator<=(const SingleLinkedList<Type>& lhs, const SingleLinkedList<Type>& rhs) {
-    return (lhs < rhs || lhs == rhs);
+    return !(lhs < rhs);
 }
 
 template <typename Type>
@@ -288,5 +285,5 @@ bool operator>(const SingleLinkedList<Type>& lhs, const SingleLinkedList<Type>& 
 
 template <typename Type>
 bool operator>=(const SingleLinkedList<Type>& lhs, const SingleLinkedList<Type>& rhs) {
-    return (lhs > rhs || lhs == rhs);
+    return !(lhs > rhs);
 }
